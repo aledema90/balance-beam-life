@@ -1,4 +1,5 @@
 import { useBudget } from '@/hooks/useBudget';
+import { YearlyForecast } from './YearlyForecast';
 import { BudgetOverview } from './BudgetOverview';
 import { ExpenseForm } from './ExpenseForm';
 import { ExpenseList } from './ExpenseList';
@@ -80,8 +81,16 @@ export const BudgetDashboard = () => {
           <ExpenseForm onAddExpense={addExpense} />
         </div>
 
+        {/* Yearly Forecast */}
+        <div className="mb-8">
+          <YearlyForecast 
+            monthlyBudget={monthlyBudget}
+            currentSpending={categorySpending}
+          />
+        </div>
+
         {/* Expense List */}
-        <div>
+        <div className="mb-8">
           <ExpenseList 
             expenses={expenses}
             onDeleteExpense={deleteExpense}
