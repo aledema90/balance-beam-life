@@ -7,6 +7,8 @@ export interface Expense {
   category: ExpenseCategory;
   description: string;
   isFixed?: boolean;
+  isActual?: boolean; // true = actually happened, false/undefined = planned
+  plannedMonth?: string; // for planned expenses, format: "YYYY-MM"
 }
 
 export interface BudgetSettings {

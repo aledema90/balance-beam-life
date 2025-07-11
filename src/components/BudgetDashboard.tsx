@@ -14,7 +14,9 @@ export const BudgetDashboard = () => {
     settings,
     monthlyBudget,
     categorySpending,
+    plannedSpending,
     remainingBudget,
+    getAllExpensesByCategory,
     addExpense,
     updateExpense,
     deleteExpense,
@@ -73,6 +75,11 @@ export const BudgetDashboard = () => {
           <BudgetOverview 
             budget={monthlyBudget}
             spending={categorySpending}
+            plannedSpending={plannedSpending}
+            getAllExpensesByCategory={getAllExpensesByCategory}
+            onAddExpense={addExpense}
+            onUpdateExpense={updateExpense}
+            onDeleteExpense={deleteExpense}
           />
         </div>
 

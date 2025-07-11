@@ -14,6 +14,7 @@ interface ExpenseFormProps {
     amount: number;
     category: ExpenseCategory;
     description: string;
+    isActual?: boolean;
   }) => void;
 }
 
@@ -34,7 +35,8 @@ export const ExpenseForm = ({ onAddExpense }: ExpenseFormProps) => {
       date: formData.date,
       amount: parseFloat(formData.amount),
       category: formData.category,
-      description: formData.description
+      description: formData.description,
+      isActual: true // Default to actual expense when added from main form
     });
 
     setFormData({

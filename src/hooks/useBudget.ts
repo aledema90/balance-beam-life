@@ -52,7 +52,8 @@ export const useBudget = () => {
         amount: DEFAULT_SETTINGS.fixedExpenses.mortgage,
         category: 'needs',
         description: 'Mortgage Payment',
-        isFixed: true
+        isFixed: true,
+        isActual: true
       },
       {
         id: `car-${currentMonth}`,
@@ -60,7 +61,8 @@ export const useBudget = () => {
         amount: DEFAULT_SETTINGS.fixedExpenses.carPayment,
         category: 'needs',
         description: 'Car Payment',
-        isFixed: true
+        isFixed: true,
+        isActual: true
       }
     ];
     setExpenses(fixedExpenses);
@@ -83,12 +85,40 @@ export const useBudget = () => {
 
   const getCategorySpending = (): CategorySpending => {
     const currentExpenses = getCurrentMonthExpenses();
-    return currentExpenses.reduce(
-      (acc, expense) => {
-        acc[expense.category] += expense.amount;
-        return acc;
-      },
-      { needs: 0, wants: 0, savings: 0 }
+    // Only count expenses that are marked as actual (happened)
+    return currentExpenses
+      .filter(expense => expense.isActual === true)
+      .reduce(
+        (acc, expense) => {
+          acc[expense.category] += expense.amount;
+          return acc;
+        },
+        { needs: 0, wants: 0, savings: 0 }
+      );
+  };
+
+  const getPlannedSpending = (monthYear?: string): CategorySpending => {
+    const targetMonth = monthYear || new Date().toISOString().slice(0, 7);
+    const monthExpenses = expenses.filter(expense => 
+      expense.date.startsWith(targetMonth) || expense.plannedMonth === targetMonth
+    );
+    
+    return monthExpenses
+      .filter(expense => expense.isActual !== true) // Only planned expenses
+      .reduce(
+        (acc, expense) => {
+          acc[expense.category] += expense.amount;
+          return acc;
+        },
+        { needs: 0, wants: 0, savings: 0 }
+      );
+  };
+
+  const getAllExpensesByCategory = (category: string, monthYear?: string) => {
+    const targetMonth = monthYear || new Date().toISOString().slice(0, 7);
+    return expenses.filter(expense => 
+      expense.category === category && 
+      (expense.date.startsWith(targetMonth) || expense.plannedMonth === targetMonth)
     );
   };
 
@@ -130,7 +160,9 @@ export const useBudget = () => {
     settings,
     monthlyBudget: getMonthlyBudget(),
     categorySpending: getCategorySpending(),
+    plannedSpending: getPlannedSpending(),
     remainingBudget: getRemainingBudget(),
+    getAllExpensesByCategory,
     addExpense,
     updateExpense,
     deleteExpense,

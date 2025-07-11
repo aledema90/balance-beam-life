@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Expense, ExpenseCategory } from '@/types/budget';
-import { Trash2, Edit, Calendar, Euro } from 'lucide-react';
+import { Trash2, Edit, Calendar, Euro, Check, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ExpenseListProps {
@@ -87,11 +87,24 @@ export const ExpenseList = ({ expenses, onDeleteExpense, onEditExpense }: Expens
                     <p className="font-medium text-sm truncate">
                       {expense.description}
                     </p>
-                    {expense.isFixed && (
-                      <Badge variant="secondary" className="text-xs">
-                        Fixed
-                      </Badge>
-                    )}
+                    <div className="flex gap-1">
+                      {expense.isFixed && (
+                        <Badge variant="secondary" className="text-xs">
+                          Fixed
+                        </Badge>
+                      )}
+                      {expense.isActual === true ? (
+                        <Badge variant="default" className="text-xs bg-success/20 text-success">
+                          <Check className="w-3 h-3 mr-1" />
+                          Actual
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Planned
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatDate(expense.date)}</span>
