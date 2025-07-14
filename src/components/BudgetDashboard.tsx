@@ -1,4 +1,5 @@
 import { useBudget } from '@/hooks/useBudget';
+import { useAuth } from '@/hooks/useAuth';
 import { YearlyForecast } from './YearlyForecast';
 import { BudgetOverview } from './BudgetOverview';
 import { ExpenseForm } from './ExpenseForm';
@@ -6,9 +7,11 @@ import { ExpenseList } from './ExpenseList';
 import { MonthlySummary } from './MonthlySummary';
 import { SettingsModal } from './SettingsModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Wallet, Calendar, LogOut } from 'lucide-react';
 
 export const BudgetDashboard = () => {
+  const { signOut } = useAuth();
   const {
     expenses,
     settings,
@@ -22,6 +25,10 @@ export const BudgetDashboard = () => {
     deleteExpense,
     updateSettings
   } = useBudget();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const getCurrentMonth = () => {
     return new Intl.DateTimeFormat('en-US', {
@@ -49,6 +56,15 @@ export const BudgetDashboard = () => {
               settings={settings}
               onUpdateSettings={updateSettings}
             />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
 
