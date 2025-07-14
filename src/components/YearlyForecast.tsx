@@ -44,11 +44,12 @@ export const YearlyForecast = ({ monthlyBudget, currentSpending }: YearlyForecas
     const currentYear = new Date().getFullYear();
     
     // Calculate spending rate based on current month (if we have data)
-    const totalCurrentSpending = currentSpending.needs + currentSpending.wants + currentSpending.savings;
+    const totalCurrentSpending = currentSpending.needs + currentSpending.wants;
     const spendingRates = {
       needs: totalCurrentSpending > 0 ? currentSpending.needs / monthlyBudget.needs : 0.85, // Default 85% if no data
       wants: totalCurrentSpending > 0 ? currentSpending.wants / monthlyBudget.wants : 0.70, // Default 70% if no data
-      savings: totalCurrentSpending > 0 ? currentSpending.savings / monthlyBudget.savings : 0.90, // Default 90% if no data
+      // Savings rate is calculated based on remaining amount after needs and wants
+      savings: 0.90, // We'll calculate actual savings based on what remains
     };
 
     let cumulativeSavings = 0;
@@ -63,13 +64,23 @@ export const YearlyForecast = ({ monthlyBudget, currentSpending }: YearlyForecas
       
       let projectedSpending;
       if (isCurrentMonth) {
-        projectedSpending = currentSpending;
+        // For current month, calculate actual savings as remaining amount
+        const actualSavings = monthlyBudget.total - currentSpending.needs - currentSpending.wants;
+        projectedSpending = {
+          needs: currentSpending.needs,
+          wants: currentSpending.wants,
+          savings: actualSavings
+        };
       } else {
         // Project future spending based on current patterns
+        const projectedNeeds = Math.round(monthlyBudget.needs * spendingRates.needs);
+        const projectedWants = Math.round(monthlyBudget.wants * spendingRates.wants);
+        const projectedSavings = monthlyBudget.total - projectedNeeds - projectedWants;
+        
         projectedSpending = {
-          needs: Math.round(monthlyBudget.needs * spendingRates.needs),
-          wants: Math.round(monthlyBudget.wants * spendingRates.wants),
-          savings: Math.round(monthlyBudget.savings * spendingRates.savings),
+          needs: projectedNeeds,
+          wants: projectedWants,
+          savings: projectedSavings,
         };
       }
 

@@ -25,7 +25,7 @@ export const BudgetOverview = ({
   onUpdateExpense,
   onDeleteExpense
 }: BudgetOverviewProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | 'savings' | null>(null);
 
   const getPercentageUsed = (spent: number, budgeted: number) => {
     return budgeted > 0 ? (spent / budgeted) * 100 : 0;
@@ -63,8 +63,9 @@ export const BudgetOverview = ({
       color: 'bg-savings',
       percentage: 20,
       budget: budget.savings,
-      spent: spending.savings,
-      planned: plannedSpending.savings
+      spent: 0, // Savings are calculated, not spent
+      planned: 0, // No planned savings expenses
+      isCalculated: true
     }
   ];
 
@@ -132,27 +133,39 @@ export const BudgetOverview = ({
                   </p>
                 )}
 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-3"
-                  onClick={() => setSelectedCategory(category.key)}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Details
-                </Button>
+                {/* Only show View Details button for interactive categories */}
+                {!category.isCalculated && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-3"
+                    onClick={() => setSelectedCategory(category.key)}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                )}
+                
+                {/* Show info for calculated categories */}
+                {category.isCalculated && (
+                  <div className="mt-3 p-2 bg-muted rounded-md">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Automatically calculated as remaining income
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Category Modal */}
-      {selectedCategory && (
+      {/* Category Modal - only for interactive categories (needs, wants) */}
+      {selectedCategory && selectedCategory !== 'savings' && (
         <CategoryModal
           isOpen={true}
           onClose={() => setSelectedCategory(null)}
-          category={selectedCategory}
+          category={selectedCategory as ExpenseCategory}
           expenses={getAllExpensesByCategory(selectedCategory)}
           budgetAmount={budget[selectedCategory]}
           actualSpent={spending[selectedCategory]}

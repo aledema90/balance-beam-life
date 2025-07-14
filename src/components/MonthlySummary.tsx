@@ -22,9 +22,11 @@ export const MonthlySummary = ({ budget, spending, remainingBudget }: MonthlySum
     }).format(amount);
   };
 
-  const totalSpent = spending.needs + spending.wants + spending.savings;
-  const savingsRate = budget.total > 0 ? (spending.savings / budget.total) * 100 : 0;
-  const isOnTrack = savingsRate >= 20;
+  const totalSpent = spending.needs + spending.wants;
+  // Calculate actual savings as remaining amount after needs and wants spending
+  const actualSavings = budget.total - totalSpent;
+  const savingsRate = budget.total > 0 ? (actualSavings / budget.total) * 100 : 0;
+  const isOnTrack = actualSavings >= budget.savings;
 
   const getCurrentMonth = () => {
     return new Intl.DateTimeFormat('en-US', {
@@ -75,16 +77,16 @@ export const MonthlySummary = ({ budget, spending, remainingBudget }: MonthlySum
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Target className="w-4 h-4" />
-            Savings Rate
+            Actual Savings
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {savingsRate.toFixed(1)}%
+            {formatCurrency(actualSavings)}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={isOnTrack ? "default" : "secondary"} className="text-xs">
-              Target: 20%
+              {savingsRate.toFixed(1)}% of income
             </Badge>
             {isOnTrack ? (
               <TrendingUp className="w-3 h-3 text-success" />
@@ -92,6 +94,9 @@ export const MonthlySummary = ({ budget, spending, remainingBudget }: MonthlySum
               <TrendingDown className="w-3 h-3 text-warning" />
             )}
           </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Target: {formatCurrency(budget.savings)} ({((budget.savings / budget.total) * 100).toFixed(0)}%)
+          </p>
         </CardContent>
       </Card>
 

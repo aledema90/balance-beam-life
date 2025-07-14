@@ -1,4 +1,4 @@
-export type ExpenseCategory = 'needs' | 'wants' | 'savings';
+export type ExpenseCategory = 'needs' | 'wants';
 
 export interface Expense {
   id: string;
@@ -29,5 +29,4 @@ export interface MonthlyBudget {
 export interface CategorySpending {
   needs: number;
   wants: number;
-  savings: number;
 }

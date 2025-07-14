@@ -75,10 +75,15 @@ export const useBudget = () => {
 
   const getMonthlyBudget = (): MonthlyBudget => {
     const totalIncome = settings.monthlyIncome;
+    const needs = Math.floor(totalIncome * 0.5);
+    const wants = Math.floor(totalIncome * 0.3);
+    // Savings is calculated as the difference between income and needs+wants
+    const savings = totalIncome - needs - wants;
+    
     return {
-      needs: Math.floor(totalIncome * 0.5),
-      wants: Math.floor(totalIncome * 0.3),
-      savings: Math.floor(totalIncome * 0.2),
+      needs,
+      wants,
+      savings,
       total: totalIncome
     };
   };
@@ -86,6 +91,7 @@ export const useBudget = () => {
   const getCategorySpending = (): CategorySpending => {
     const currentExpenses = getCurrentMonthExpenses();
     // Only count expenses that are marked as actual (happened)
+    // Savings category is no longer interactive, so we only track needs and wants
     return currentExpenses
       .filter(expense => expense.isActual === true)
       .reduce(
@@ -93,7 +99,7 @@ export const useBudget = () => {
           acc[expense.category] += expense.amount;
           return acc;
         },
-        { needs: 0, wants: 0, savings: 0 }
+        { needs: 0, wants: 0 }
       );
   };
 
@@ -110,7 +116,7 @@ export const useBudget = () => {
           acc[expense.category] += expense.amount;
           return acc;
         },
-        { needs: 0, wants: 0, savings: 0 }
+        { needs: 0, wants: 0 }
       );
   };
 
@@ -125,11 +131,14 @@ export const useBudget = () => {
   const getRemainingBudget = () => {
     const budget = getMonthlyBudget();
     const spending = getCategorySpending();
+    // Calculate actual savings as what's left after needs and wants spending
+    const actualSavings = budget.total - spending.needs - spending.wants;
+    
     return {
       needs: budget.needs - spending.needs,
       wants: budget.wants - spending.wants,
-      savings: budget.savings - spending.savings,
-      total: budget.total - (spending.needs + spending.wants + spending.savings)
+      savings: actualSavings,
+      total: actualSavings
     };
   };
 

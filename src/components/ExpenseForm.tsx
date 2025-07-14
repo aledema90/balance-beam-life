@@ -50,8 +50,8 @@ export const ExpenseForm = ({ onAddExpense }: ExpenseFormProps) => {
 
   const categoryOptions = [
     { value: 'needs', label: 'Needs', color: 'text-needs' },
-    { value: 'wants', label: 'Wants', color: 'text-wants' },
-    { value: 'savings', label: 'Savings', color: 'text-savings' }
+    { value: 'wants', label: 'Wants', color: 'text-wants' }
+    // Savings removed - it's now calculated automatically
   ];
 
   if (!isOpen) {
