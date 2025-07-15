@@ -11,7 +11,8 @@ const DEFAULT_SETTINGS: BudgetSettings = {
   fixedExpenses: {
     mortgage: 1200,
     carPayment: 237
-  }
+  },
+  customFixedExpenses: []
 };
 
 export const useBudget = () => {
