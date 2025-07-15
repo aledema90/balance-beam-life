@@ -92,6 +92,7 @@ export const BudgetDashboard = () => {
             budget={monthlyBudget}
             spending={categorySpending}
             plannedSpending={plannedSpending}
+            remainingBudget={remainingBudget}
             getAllExpensesByCategory={getAllExpensesByCategory}
             onAddExpense={addExpense}
             onUpdateExpense={updateExpense}

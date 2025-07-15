@@ -10,6 +10,12 @@ interface BudgetOverviewProps {
   budget: MonthlyBudget;
   spending: CategorySpending;
   plannedSpending: CategorySpending;
+  remainingBudget: {
+    needs: number;
+    wants: number;
+    savings: number;
+    total: number;
+  };
   getAllExpensesByCategory: (category: string, monthYear?: string) => Expense[];
   onAddExpense: (expense: Omit<Expense, 'id'>) => void;
   onUpdateExpense: (id: string, updates: Partial<Expense>) => void;
@@ -20,6 +26,7 @@ export const BudgetOverview = ({
   budget, 
   spending, 
   plannedSpending,
+  remainingBudget,
   getAllExpensesByCategory,
   onAddExpense,
   onUpdateExpense,
@@ -74,7 +81,8 @@ export const BudgetOverview = ({
       <div className="grid gap-4 md:grid-cols-3">
         {categories.map((category) => {
           const percentageUsed = getPercentageUsed(category.spent, category.budget);
-          const remaining = category.budget - category.spent;
+          // For savings, use the calculated actual savings amount, otherwise use budget - spent
+          const remaining = category.key === 'savings' ? remainingBudget.savings : category.budget - category.spent;
           const isOverBudget = category.spent > category.budget;
 
           return (
