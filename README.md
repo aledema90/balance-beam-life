@@ -1,73 +1,105 @@
-# Welcome to your Lovable project
+# Balance Beam Life — 50/30/20 Budget Tracker
 
-## Project info
+## Overview
 
-**URL**: https://lovable.dev/projects/39851cbe-c977-49f4-a7ba-4d15e5aba216
+Balance Beam Life is a personal finance web app that helps you manage your expenses using the 50/30/20 budgeting rule. Track your monthly and yearly spending, add/edit/delete expenses, view budget breakdowns, and adjust your financial settings—all in one place.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **User Authentication** (sign in/out)
+- **Monthly & Yearly Budget Tracking**
+- **Expense Management** (add, edit, delete)
+- **Budget Overview & Summaries**
+- **Settings for Salary, Categories, etc.**
+- **Responsive, Modern UI**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/39851cbe-c977-49f4-a7ba-4d15e5aba216) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## How It Works
 
-**Use your preferred IDE**
+1. **Authenticate**: Sign in to access your dashboard.
+2. **Dashboard**: View summaries, add expenses, and see your budget breakdown.
+3. **Data Storage**: All data is securely stored and managed via Supabase.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Project Structure & File Purposes
 
-Follow these steps:
+| File/Folder              | Purpose                                                   |
+| ------------------------ | --------------------------------------------------------- |
+| `App.tsx`, `main.tsx`    | App entry, routing, global providers                      |
+| `pages/`                 | Top-level pages (auth, home, 404)                         |
+| `components/`            | Main feature components (dashboard, forms, lists, modals) |
+| `components/ui/`         | Reusable UI primitives (buttons, cards, dialogs, etc.)    |
+| `hooks/`                 | Custom React hooks for business logic                     |
+| `integrations/supabase/` | Supabase client and types                                 |
+| `lib/utils.ts`           | Utility functions                                         |
+| `types/`                 | TypeScript types/interfaces                               |
+| `supabase/`              | Backend config and migrations                             |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Key Components
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **BudgetDashboard.tsx**: Main dashboard, orchestrates all budget features and UI.
+- **BudgetOverview.tsx**: Shows a breakdown of the monthly budget and spending.
+- **ExpenseForm.tsx**: Form to add new expenses.
+- **ExpenseList.tsx**: Displays a list of all expenses.
+- **MonthlySummary.tsx**: Shows a summary of the current month’s budget and spending.
+- **SettingsModal.tsx**: Modal for adjusting user/budget settings.
+- **YearlyForecast.tsx**: Projects spending and budget for the year.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Hooks
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- **useBudget.ts**: All budget logic (fetching, adding, updating, deleting expenses, and managing settings).
+- **useAuth.ts**: Authentication logic (sign in/out, user state).
 
-**Edit a file directly in GitHub**
+### Integrations
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **integrations/supabase/**: Connects to Supabase for backend/auth/database.
 
-**Use GitHub Codespaces**
+### Types & Utilities
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **types/budget.ts**: TypeScript types/interfaces for budget data.
+- **lib/utils.ts**: Helper functions.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## Tech Stack
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/39851cbe-c977-49f4-a7ba-4d15e5aba216) and click on Share -> Publish.
+## Setup & Development
 
-## Can I connect a custom domain to my Lovable project?
+```sh
+# Clone the repository
+ git clone <YOUR_GIT_URL>
 
-Yes, you can!
+# Navigate to the project directory
+cd <YOUR_PROJECT_NAME>
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Install dependencies
+npm i
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+# Start the development server
+npm run dev
+```
+
+---
+
+## Deployment
+
+You can deploy this project using Lovable or your preferred platform. For Lovable, open your project and click Share -> Publish.
+
+---
+
+## Custom Domain
+
+To connect a custom domain, navigate to Project > Settings > Domains and click Connect Domain. See [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide) for more info.
