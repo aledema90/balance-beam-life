@@ -4,8 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BudgetSettings } from '@/types/budget';
-import { Settings, Save } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BudgetSettings, FixedExpense, ExpenseCategory } from '@/types/budget';
+import { Settings, Save, Plus, Trash2 } from 'lucide-react';
 
 interface SettingsModalProps {
   settings: BudgetSettings;
@@ -19,6 +20,9 @@ export const SettingsModal = ({ settings, onUpdateSettings }: SettingsModalProps
     mortgage: settings.fixedExpenses.mortgage.toString(),
     carPayment: settings.fixedExpenses.carPayment.toString()
   });
+  const [customFixedExpenses, setCustomFixedExpenses] = useState<FixedExpense[]>(
+    settings.customFixedExpenses || []
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,10 +32,34 @@ export const SettingsModal = ({ settings, onUpdateSettings }: SettingsModalProps
       fixedExpenses: {
         mortgage: parseFloat(formData.mortgage),
         carPayment: parseFloat(formData.carPayment)
-      }
+      },
+      customFixedExpenses
     });
     
     setIsOpen(false);
+  };
+
+  const addFixedExpense = () => {
+    const newExpense: FixedExpense = {
+      id: Date.now().toString(),
+      name: '',
+      value: 0,
+      category: 'needs',
+      recurrence: 'monthly'
+    };
+    setCustomFixedExpenses([...customFixedExpenses, newExpense]);
+  };
+
+  const updateFixedExpense = (id: string, updates: Partial<FixedExpense>) => {
+    setCustomFixedExpenses(prev => 
+      prev.map(expense => 
+        expense.id === id ? { ...expense, ...updates } : expense
+      )
+    );
+  };
+
+  const removeFixedExpense = (id: string) => {
+    setCustomFixedExpenses(prev => prev.filter(expense => expense.id !== id));
   };
 
   const formatCurrency = (amount: number) => {
@@ -49,7 +77,7 @@ export const SettingsModal = ({ settings, onUpdateSettings }: SettingsModalProps
           Settings
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Budget Settings</DialogTitle>
         </DialogHeader>
@@ -83,9 +111,9 @@ export const SettingsModal = ({ settings, onUpdateSettings }: SettingsModalProps
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Fixed Expenses</CardTitle>
+              <CardTitle className="text-base">Default Fixed Expenses</CardTitle>
               <CardDescription>
-                Recurring monthly expenses automatically deducted
+                Basic recurring monthly expenses
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -126,6 +154,120 @@ export const SettingsModal = ({ settings, onUpdateSettings }: SettingsModalProps
                   Monthly installment
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center justify-between">
+                Custom Fixed Expenses
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={addFixedExpense}
+                  className="gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Add your own recurring expenses with custom schedules
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {customFixedExpenses.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No custom fixed expenses added yet
+                </p>
+              ) : (
+                customFixedExpenses.map((expense) => (
+                  <div key={expense.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Fixed Expense</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFixedExpense(expense.id)}
+                        className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`name-${expense.id}`}>Name</Label>
+                        <Input
+                          id={`name-${expense.id}`}
+                          placeholder="e.g., Netflix"
+                          value={expense.name}
+                          onChange={(e) => updateFixedExpense(expense.id, { name: e.target.value })}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`value-${expense.id}`}>Amount (€)</Label>
+                        <Input
+                          id={`value-${expense.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={expense.value || ''}
+                          onChange={(e) => updateFixedExpense(expense.id, { value: parseFloat(e.target.value) || 0 })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`category-${expense.id}`}>Category</Label>
+                        <Select
+                          value={expense.category}
+                          onValueChange={(value: ExpenseCategory) => 
+                            updateFixedExpense(expense.id, { category: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="needs">Needs</SelectItem>
+                            <SelectItem value="wants">Wants</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`recurrence-${expense.id}`}>Recurrence</Label>
+                        <Select
+                          value={expense.recurrence.toString()}
+                          onValueChange={(value) => 
+                            updateFixedExpense(expense.id, { 
+                              recurrence: value === 'monthly' ? 'monthly' : parseInt(value) 
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="7">Weekly (7 days)</SelectItem>
+                            <SelectItem value="14">Bi-weekly (14 days)</SelectItem>
+                            <SelectItem value="30">Every 30 days</SelectItem>
+                            <SelectItem value="90">Quarterly (90 days)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 

@@ -11,12 +11,21 @@ export interface Expense {
   plannedMonth?: string; // for planned expenses, format: "YYYY-MM"
 }
 
+export interface FixedExpense {
+  id: string;
+  name: string;
+  value: number;
+  category: ExpenseCategory;
+  recurrence: 'monthly' | number; // 'monthly' or custom days
+}
+
 export interface BudgetSettings {
   monthlyIncome: number;
   fixedExpenses: {
     mortgage: number;
     carPayment: number;
   };
+  customFixedExpenses: FixedExpense[];
 }
 
 export interface MonthlyBudget {
