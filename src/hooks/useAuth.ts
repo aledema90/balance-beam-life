@@ -19,12 +19,17 @@ export const useAuth = () => {
         
         if (session?.user?.email) {
           console.log('useAuth: Checking if user is allowed');
-          // Check if user is allowed
-          const { data: allowed, error } = await supabase.rpc('is_user_allowed', {
-            user_email: session.user.email
-          });
-          console.log('useAuth: User allowed check result', { allowed, error });
-          setIsAllowed(!!allowed);
+          try {
+            // Check if user is allowed with timeout
+            const { data: allowed, error } = await supabase.rpc('is_user_allowed', {
+              user_email: session.user.email
+            });
+            console.log('useAuth: User allowed check result', { allowed, error });
+            setIsAllowed(!!allowed);
+          } catch (err) {
+            console.error('useAuth: Error checking user allowed', err);
+            setIsAllowed(false);
+          }
         } else {
           console.log('useAuth: No session or email, setting not allowed');
           setIsAllowed(false);
