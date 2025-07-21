@@ -9,22 +9,28 @@ export const useAuth = () => {
   const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
+    console.log('useAuth: Setting up auth state listener');
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('useAuth: Auth state changed', { event, hasSession: !!session, userEmail: session?.user?.email });
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user?.email) {
+          console.log('useAuth: Checking if user is allowed');
           // Check if user is allowed
-          const { data: allowed } = await supabase.rpc('is_user_allowed', {
+          const { data: allowed, error } = await supabase.rpc('is_user_allowed', {
             user_email: session.user.email
           });
+          console.log('useAuth: User allowed check result', { allowed, error });
           setIsAllowed(!!allowed);
         } else {
+          console.log('useAuth: No session or email, setting not allowed');
           setIsAllowed(false);
         }
         
+        console.log('useAuth: Setting loading to false');
         setLoading(false);
       }
     );
