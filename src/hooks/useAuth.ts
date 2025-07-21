@@ -65,6 +65,6 @@ export const useAuth = () => {
     loading,
     isAllowed,
     signOut,
-    isAuthenticated: true // Temporarily bypass auth for development
+    isAuthenticated: !!user && isAllowed
   };
 };
