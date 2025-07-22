@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Wallet, LogOut, Plus, ChevronLeft, ChevronRight, Edit2, Save, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { YearlyForecast } from './YearlyForecast';
 
 const CategoryModal = ({ isOpen, onClose, onCreateCategory }: {
   isOpen: boolean;
@@ -172,6 +173,7 @@ export const SimpleBudgetDashboard = () => {
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showForecast, setShowForecast] = useState(false);
   
   // Sample data until database is connected
   const [categories, setCategories] = useState([
@@ -243,6 +245,20 @@ export const SimpleBudgetDashboard = () => {
     });
   };
 
+  // Sample forecast data
+  const sampleBudget = {
+    total: 5000,
+    needs: 3000,
+    wants: 1500,
+    savings: 500
+  };
+
+  const sampleSpending = {
+    needs: 2800,
+    wants: 1200,
+    savings: 0
+  };
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -312,6 +328,13 @@ export const SimpleBudgetDashboard = () => {
               Add Category
             </Button>
             <Button 
+              onClick={() => setShowForecast(!showForecast)}
+              variant={showForecast ? "default" : "outline"}
+              className="flex items-center gap-2"
+            >
+              Forecast
+            </Button>
+            <Button 
               variant="outline" 
               size="sm" 
               onClick={handleSignOut}
@@ -352,6 +375,16 @@ export const SimpleBudgetDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Yearly Forecast */}
+        {showForecast && (
+          <div className="mb-8">
+            <YearlyForecast 
+              monthlyBudget={sampleBudget}
+              currentSpending={sampleSpending}
+            />
+          </div>
+        )}
 
         {/* Categories */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
