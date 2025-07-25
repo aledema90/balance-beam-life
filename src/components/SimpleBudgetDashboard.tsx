@@ -81,9 +81,12 @@ const CategoryModal = ({ isOpen, onClose, onCreateCategory }: {
   );
 };
 
-const CategoryCard = ({ category, onAddSubcategory }: any) => {
+const CategoryCard = ({ category, onAddSubcategory, onEditSubcategory }: any) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [subcategoryName, setSubcategoryName] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editFrequency, setEditFrequency] = useState<'monthly' | 'custom'>('monthly');
 
   const handleAddSubcategory = () => {
     if (subcategoryName.trim()) {
@@ -91,6 +94,30 @@ const CategoryCard = ({ category, onAddSubcategory }: any) => {
       setSubcategoryName('');
       setShowAddForm(false);
     }
+  };
+
+  const startEdit = (sub: any) => {
+    setEditingId(sub.id);
+    setEditAmount(sub.amount?.toString() || '0');
+    setEditFrequency(sub.frequency || 'monthly');
+  };
+
+  const handleSaveEdit = () => {
+    if (editingId && editAmount.trim()) {
+      onEditSubcategory(category.id, editingId, {
+        amount: parseFloat(editAmount),
+        frequency: editFrequency
+      });
+      setEditingId(null);
+      setEditAmount('');
+      setEditFrequency('monthly');
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditAmount('');
+    setEditFrequency('monthly');
   };
 
   return (
@@ -115,23 +142,70 @@ const CategoryCard = ({ category, onAddSubcategory }: any) => {
       <CardContent>
         <div className="space-y-3">
           {category.subcategories?.map((sub: any) => (
-            <div key={sub.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex-1">
-                <div className="font-medium">{sub.name}</div>
-                {sub.is_recurring && (
-                  <Badge variant="outline" className="mt-1 text-xs">
-                    Recurring
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-right min-w-[80px]">
-                  <div className="font-medium">$0.00</div>
+            <div key={sub.id} className="p-3 bg-muted rounded-lg">
+              {editingId === sub.id ? (
+                <div className="space-y-3">
+                  <div className="font-medium">{sub.name}</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Amount</Label>
+                      <Input
+                        type="number"
+                        value={editAmount}
+                        onChange={(e) => setEditAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Frequency</Label>
+                      <Select value={editFrequency} onValueChange={(value: 'monthly' | 'custom') => setEditFrequency(value)}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" onClick={handleSaveEdit}>
+                      <Save className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={cancelEdit}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <Button size="sm" variant="outline">
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium">{sub.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {sub.frequency && (
+                        <Badge variant="outline" className="text-xs">
+                          {sub.frequency === 'monthly' ? 'Monthly' : 'Custom'}
+                        </Badge>
+                      )}
+                      {sub.is_recurring && (
+                        <Badge variant="outline" className="text-xs">
+                          Recurring
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right min-w-[80px]">
+                      <div className="font-medium">${sub.amount || '0.00'}</div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => startEdit(sub)}>
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
@@ -242,6 +316,26 @@ export const SimpleBudgetDashboard = () => {
     toast({
       title: "Success",
       description: `Subcategory "${name}" created successfully.`,
+    });
+  };
+
+  const editSubcategory = (categoryId: string, subcategoryId: string, updates: { amount: number; frequency: 'monthly' | 'custom' }) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId 
+        ? {
+            ...cat,
+            subcategories: cat.subcategories.map(sub => 
+              sub.id === subcategoryId 
+                ? { ...sub, ...updates }
+                : sub
+            )
+          }
+        : cat
+    ));
+
+    toast({
+      title: "Success",
+      description: "Subcategory updated successfully.",
     });
   };
 
@@ -393,6 +487,7 @@ export const SimpleBudgetDashboard = () => {
               key={category.id}
               category={category}
               onAddSubcategory={createSubcategory}
+              onEditSubcategory={editSubcategory}
             />
           ))}
         </div>
