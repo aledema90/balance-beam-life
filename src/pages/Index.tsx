@@ -1,7 +1,7 @@
-import { BudgetDashboard } from '@/components/BudgetDashboard';
+import { SimpleBudgetDashboard } from '@/components/SimpleBudgetDashboard';
 
 const Index = () => {
-  return <BudgetDashboard />;
+  return <SimpleBudgetDashboard />;
 };
 
 export default Index;
