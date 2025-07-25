@@ -18,9 +18,12 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user?.email) {
-          console.log('useAuth: User logged in, setting allowed to true');
-          // Temporarily bypass RPC call - user is authenticated so they're allowed
-          setIsAllowed(true);
+          console.log('useAuth: User logged in, checking authorization');
+          // Check if user is allowed via RPC call
+          const { data: allowed } = await supabase.rpc('is_user_allowed', {
+            user_email: session.user.email
+          });
+          setIsAllowed(!!allowed);
         } else {
           console.log('useAuth: No session or email, setting not allowed');
           setIsAllowed(false);
