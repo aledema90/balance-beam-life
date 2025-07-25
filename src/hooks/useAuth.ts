@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -10,40 +10,81 @@ export const useAuth = () => {
 
   useEffect(() => {
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user?.email) {
-          // Check if user is allowed
-          const { data: allowed } = await supabase.rpc('is_user_allowed', {
-            user_email: session.user.email
-          });
-          setIsAllowed(!!allowed);
-        } else {
-          setIsAllowed(false);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("[onAuthStateChange] event:", event, "session:", session);
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user?.email) {
-        const { data: allowed } = await supabase.rpc('is_user_allowed', {
-          user_email: session.user.email
-        });
-        setIsAllowed(!!allowed);
+        console.log(
+          "[onAuthStateChange] Checking if user is allowed for email:",
+          session.user.email
+        );
+        try {
+          const { data: allowed, error } = await supabase.rpc(
+            "is_user_allowed",
+            {
+              user_email: session.user.email,
+            }
+          );
+          if (error) {
+            console.error(
+              "[onAuthStateChange] Error from is_user_allowed:",
+              error
+            );
+          }
+          setIsAllowed(!!allowed);
+          console.log("[onAuthStateChange] isAllowed:", !!allowed);
+        } catch (err) {
+          console.error(
+            "[onAuthStateChange] Exception during is_user_allowed:",
+            err
+          );
+          setIsAllowed(false);
+        }
       } else {
         setIsAllowed(false);
       }
-      
+
       setLoading(false);
+      console.log("[onAuthStateChange] Loading set to false");
+    });
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("[getSession] session:", session);
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user?.email) {
+        console.log(
+          "[getSession] Checking if user is allowed for email:",
+          session.user.email
+        );
+        try {
+          const { data: allowed, error } = await supabase.rpc(
+            "is_user_allowed",
+            {
+              user_email: session.user.email,
+            }
+          );
+          if (error) {
+            console.error("[getSession] Error from is_user_allowed:", error);
+          }
+          setIsAllowed(!!allowed);
+          console.log("[getSession] isAllowed:", !!allowed);
+        } catch (err) {
+          console.error("[getSession] Exception during is_user_allowed:", err);
+          setIsAllowed(false);
+        }
+      } else {
+        setIsAllowed(false);
+      }
+
+      setLoading(false);
+      console.log("[getSession] Loading set to false");
     });
 
     return () => subscription.unsubscribe();
@@ -65,6 +106,6 @@ export const useAuth = () => {
     loading,
     isAllowed,
     signOut,
-    isAuthenticated: !!user && isAllowed
+    isAuthenticated: !!user && isAllowed,
   };
 };
