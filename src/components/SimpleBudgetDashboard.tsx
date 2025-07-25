@@ -120,6 +120,9 @@ const CategoryCard = ({ category, onAddSubcategory, onEditSubcategory }: any) =>
     setEditFrequency('monthly');
   };
 
+  // Calculate category total
+  const categoryTotal = category.subcategories?.reduce((sum: number, sub: any) => sum + (sub.amount || 0), 0) || 0;
+
   return (
     <Card>
       <CardHeader>
@@ -135,7 +138,7 @@ const CategoryCard = ({ category, onAddSubcategory, onEditSubcategory }: any) =>
             </Badge>
           </div>
           <div className="text-lg font-bold">
-            $0.00
+            ${categoryTotal.toLocaleString()}
           </div>
         </CardTitle>
       </CardHeader>
@@ -249,7 +252,7 @@ export const SimpleBudgetDashboard = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showForecast, setShowForecast] = useState(false);
   
-  // Sample data until database is connected
+  // Sample data restructured by income/expense type
   const [categories, setCategories] = useState([
     {
       id: '1',
@@ -257,8 +260,8 @@ export const SimpleBudgetDashboard = () => {
       type: 'income',
       color: '#10B981',
       subcategories: [
-        { id: '1-1', name: 'Main Job', is_recurring: true },
-        { id: '1-2', name: 'Freelance', is_recurring: false }
+        { id: '1-1', name: 'Main Job', is_recurring: true, amount: 5000, frequency: 'monthly' },
+        { id: '1-2', name: 'Freelance', is_recurring: false, amount: 800, frequency: 'custom' }
       ]
     },
     {
@@ -267,8 +270,8 @@ export const SimpleBudgetDashboard = () => {
       type: 'expense',
       color: '#EF4444',
       subcategories: [
-        { id: '2-1', name: 'Rent/Mortgage', is_recurring: true },
-        { id: '2-2', name: 'Property Tax', is_recurring: true }
+        { id: '2-1', name: 'Rent/Mortgage', is_recurring: true, amount: 1200, frequency: 'monthly' },
+        { id: '2-2', name: 'Property Tax', is_recurring: true, amount: 300, frequency: 'monthly' }
       ]
     },
     {
@@ -277,11 +280,24 @@ export const SimpleBudgetDashboard = () => {
       type: 'expense',
       color: '#F59E0B',
       subcategories: [
-        { id: '3-1', name: 'Groceries', is_recurring: false },
-        { id: '3-2', name: 'Restaurants', is_recurring: false }
+        { id: '3-1', name: 'Groceries', is_recurring: false, amount: 400, frequency: 'monthly' },
+        { id: '3-2', name: 'Restaurants', is_recurring: false, amount: 200, frequency: 'custom' }
       ]
     }
   ]);
+
+  // Group categories by type
+  const incomeCategories = categories.filter(cat => cat.type === 'income');
+  const expenseCategories = categories.filter(cat => cat.type === 'expense');
+
+  // Calculate totals
+  const totalIncome = incomeCategories.reduce((sum, cat) => 
+    sum + cat.subcategories.reduce((catSum, sub) => catSum + (sub.amount || 0), 0), 0
+  );
+  
+  const totalExpenses = expenseCategories.reduce((sum, cat) => 
+    sum + cat.subcategories.reduce((catSum, sub) => catSum + (sub.amount || 0), 0), 0
+  );
 
   const createCategory = (name: string, type: 'income' | 'expense', color: string = '#3B82F6') => {
     const newCategory = {
@@ -307,7 +323,9 @@ export const SimpleBudgetDashboard = () => {
             subcategories: [...cat.subcategories, {
               id: `${categoryId}-${Date.now()}`,
               name,
-              is_recurring: false
+              is_recurring: false,
+              amount: 0,
+              frequency: 'monthly' as 'monthly' | 'custom'
             }]
           }
         : cat
@@ -447,7 +465,7 @@ export const SimpleBudgetDashboard = () => {
               <CardTitle className="text-sm font-medium text-green-600">Income</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$0.00</div>
+              <div className="text-2xl font-bold">${totalIncome.toLocaleString()}</div>
             </CardContent>
           </Card>
           
@@ -456,7 +474,7 @@ export const SimpleBudgetDashboard = () => {
               <CardTitle className="text-sm font-medium text-red-600">Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$0.00</div>
+              <div className="text-2xl font-bold">${totalExpenses.toLocaleString()}</div>
             </CardContent>
           </Card>
 
@@ -465,7 +483,9 @@ export const SimpleBudgetDashboard = () => {
               <CardTitle className="text-sm font-medium text-blue-600">Balance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">$0.00</div>
+              <div className={`text-2xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                ${(totalIncome - totalExpenses).toLocaleString()}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -480,16 +500,55 @@ export const SimpleBudgetDashboard = () => {
           </div>
         )}
 
-        {/* Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {categories.map(category => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              onAddSubcategory={createSubcategory}
-              onEditSubcategory={editSubcategory}
-            />
-          ))}
+        {/* Income and Expenses Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Income Section */}
+          <div>
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-xl text-green-600 flex items-center gap-2">
+                  Income
+                  <Badge variant="outline" className="ml-auto">
+                    ${totalIncome.toLocaleString()}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <div className="space-y-4">
+              {incomeCategories.map(category => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  onAddSubcategory={createSubcategory}
+                  onEditSubcategory={editSubcategory}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Expenses Section */}
+          <div>
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-xl text-red-600 flex items-center gap-2">
+                  Expenses
+                  <Badge variant="outline" className="ml-auto">
+                    ${totalExpenses.toLocaleString()}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <div className="space-y-4">
+              {expenseCategories.map(category => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  onAddSubcategory={createSubcategory}
+                  onEditSubcategory={editSubcategory}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Category Modal */}
